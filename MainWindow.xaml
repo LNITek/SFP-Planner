@@ -1,0 +1,261 @@
+﻿<Window x:Class="SFP_Planner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ex="clr-namespace:ExtraFunctions.ExComponents;assembly=ExtraFunctions"
+        xmlns:local="clr-namespace:SFP_Planner"
+        xmlns:data="clr-namespace:SFP_Planner.Data"
+        mc:Ignorable="d"
+        Height="450" Width="800"
+        Title="Satisfactory Production Planner" 
+        x:Name="frmMain">
+
+    <Window.Resources>
+        <data:PlanData x:Key="PlanData"/>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+    
+    <Window.CommandBindings>
+        <CommandBinding Command="New" Executed="NewComm"/>
+        <CommandBinding Command="Open" Executed="OpenCom"/>
+        <CommandBinding Command="Close" Executed="CloseComm"/>
+        <CommandBinding Command="Save" Executed="SaveCom"/>
+        <CommandBinding Command="SaveAs" Executed="SaveAsCom"/>
+        <CommandBinding Command="data:CustomCommands.Refrech" Executed="RefrechCom"/>
+        <CommandBinding Command="data:CustomCommands.Exit" Executed="ExitCom"/>
+
+        <CommandBinding Command="Help" Executed="HelpCom"/>
+    </Window.CommandBindings>
+    <Window.InputBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="New"/>
+        <KeyBinding Gesture="Ctrl+O" Command="Open"/>
+        <KeyBinding Gesture="Ctrl+S" Command="Save"/>
+        <KeyBinding Gesture="Ctrl+Shift+S" Command="SaveAs"/>
+        <KeyBinding Key="F5" Command="data:CustomCommands.Refrech"/>
+        <KeyBinding Gesture="Alt+F4" Command="data:CustomCommands.Exit"/>
+
+        <KeyBinding Key="F1" Command="Help"/>
+    </Window.InputBindings>
+    
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" Height="20">
+            <MenuItem Header="_File">
+                <MenuItem Header="_New" Command="New" InputGestureText="Ctrl+N">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/Icons/New.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Open" Command="Open" InputGestureText="Ctrl+O">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/Icons/Open.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Close" Command="Close"/>
+                <Separator/>
+                <MenuItem Header="_Save" Command="Save" InputGestureText="Ctrl+S">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/Icons/Save.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="_Save as" Command="SaveAs" InputGestureText="Ctrl+Shift+S">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/Icons/SaveAs.png"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_Refrech" Command="data:CustomCommands.Refrech" InputGestureText="F5"/>
+                <Separator/>
+                <MenuItem Header="_Exit" Command="data:CustomCommands.Exit" InputGestureText="Alt+F4"/>
+            </MenuItem>
+            <MenuItem Header="_Edit">
+                <MenuItem Header="_Mods" Click="ModMenu_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Settings" Click="Settings_Click"/>
+            <MenuItem Header="_Help" Command="Help" InputGestureText="F1"/>
+        </Menu>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width=".4*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0">
+                <DockPanel Background="LightBlue">
+                    <Grid DockPanel.Dock="Top">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width=".4*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox x:Name="cmbMainRP" Margin="5" IsEditable="False"
+                              IsEnabled="{Binding SelectionEnabled, Source={StaticResource PlanData}}"
+                              ItemsSource="{Binding GetRecipes, Source={StaticResource PlanData}}"
+                              Text="{Binding PlanName, Mode=TwoWay, Source={StaticResource PlanData}}"/>
+                        <ex:NumericUpDown x:Name="ndtPerMin" Grid.Column="1" Background="White" Margin="0,5,5,5"
+                                          Value="{Binding PlanPerMin,Source={StaticResource PlanData}, Mode=TwoWay}" 
+                                          MaxValue="99999" ValueChanged="PerMinChanged"/>
+                    </Grid>
+                    <Border Background="White" BorderBrush="Gray" BorderThickness="1" DockPanel.Dock="Top">
+                        <StackPanel>
+                            <Button Content="{Binding ProductionPlan.Recipe, Source={StaticResource PlanData}}" 
+                                    BorderThickness="0" Background="Transparent" Margin="5,0,0,0" HorizontalAlignment="Left"
+                                    Click="DisplayProcessMain"/>
+                            <TreeView ItemsSource="{Binding ProductionPlan.Children, Source={StaticResource PlanData}}"
+                                      BorderThickness="0" x:Name="trvPlan" SelectedItemChanged="DisplayProcess" Margin="0,0,5,0">
+                                <TreeView.ItemTemplate>
+                                    <HierarchicalDataTemplate ItemsSource="{Binding Children}">
+                                        <TextBlock Text="{Binding Recipe}" Background="Transparent"
+                                                   MouseEnter="lblHiMouseEnter" MouseLeave="lblHiMouseLeave"/>
+                                        <HierarchicalDataTemplate.ItemContainerStyle>
+                                            <Style TargetType="{x:Type TreeViewItem}">
+                                                <Setter Property="Visibility" Value="{Binding Production, Converter={StaticResource BoolToVis}}"/>
+                                            </Style>
+                                        </HierarchicalDataTemplate.ItemContainerStyle>
+                                    </HierarchicalDataTemplate>
+                                </TreeView.ItemTemplate>
+                            </TreeView>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" BorderBrush="Gray" BorderThickness="1" VerticalAlignment="Bottom" DockPanel.Dock="Bottom">
+                        <StackPanel>
+                            <TextBlock Text="Inputs" Margin="2,0,0,0"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ListBox ItemsSource="{Binding SumIn,Source={StaticResource PlanData}}" IsEnabled="False"
+                                     BorderThickness="0" Background="Transparent" Grid.Column="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <ListBox ItemsSource="{Binding SumIn,Source={StaticResource PlanData}}" IsEnabled="False"
+                                     BorderThickness="0" Background="Transparent" Grid.Column="1">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Value}"/>
+                                            <TextBlock Text=" Per Min"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                            <TextBlock Text="Outputs" Margin="2,0,0,0"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ListBox ItemsSource="{Binding SumOut,Source={StaticResource PlanData}}" IsEnabled="False"
+                                     BorderThickness="0" Background="Transparent" Grid.Column="0">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Key}"/>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                                <ListBox ItemsSource="{Binding SumOut,Source={StaticResource PlanData}}" IsEnabled="False"
+                                     BorderThickness="0" Background="Transparent" Grid.Column="1">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Value}"/>
+                                                <TextBlock Text=" Per Min"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </DockPanel>
+            </Border>
+            <Border Grid.Column="1">
+                <StackPanel IsEnabled="{Binding Selected,Source={StaticResource PlanData}}">
+                    <ComboBox x:Name="cmbRP" ItemsSource="{Binding Resepies,Source={StaticResource PlanData}}"
+                                      SelectionChanged="RPSelect"/>
+                    <!--<DataGrid x:Name="dgrOutputs" ItemsSource="{Binding ActivePlan.Outputs,Source={StaticResource PlanData}}"
+                              Style="{DynamicResource Win10DataGridStyle}" AutoGenerateColumns="False" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Output Items" Binding="{Binding Item.Name}"/>
+                            <DataGridTextColumn Header="Per Min" Binding="{Binding PerMin}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>-->
+                    <ListView x:Name="dgrOutputs" ItemsSource="{Binding ActivePlan.Outputs,Source={StaticResource PlanData}}">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False" x:Name="grvOutItems">
+                                <GridViewColumn Width="200">
+                                    <GridViewColumnHeader Content="Output Items" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" 
+                                                       Text="{Binding Item.Name}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="100">
+                                    <GridViewColumnHeader Content="Per Min" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" 
+                                                       Text="{Binding PerMin}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <!--<DataGrid x:Name="dgrInputs" ItemsSource="{Binding ActivePlan.Inputs,Source={StaticResource PlanData}}"
+                              Style="{DynamicResource Win10DataGridStyle}" AutoGenerateColumns="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Input Items" Binding="{Binding Item.Name}" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Per Min" Binding="{Binding PerMin}" IsReadOnly="True"/>
+                            <DataGridTemplateColumn Header="Production">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Production}" Tag="{Binding}" Click="ProductionChecked"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>-->
+                    <ListView x:Name="dgrInputs" ItemsSource="{Binding ActivePlan.Inputs,Source={StaticResource PlanData}}">
+                        <ListView.View>
+                            <GridView AllowsColumnReorder="False" x:Name="grvInItems">
+                                <GridViewColumn Width="200">
+                                    <GridViewColumnHeader Content="Input Items" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" 
+                                                       Text="{Binding Item.Name}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="100">
+                                    <GridViewColumnHeader Content="Per Min" />
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" 
+                                                       Text="{Binding PerMin}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="100">
+                                    <GridViewColumnHeader Content="Production"/>
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding Production}" Tag="{Binding}" Click="ProductionChecked"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

@@ -1,0 +1,95 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <RootNamespace>SFP_Planner</RootNamespace>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>SFPPlanner.ico</ApplicationIcon>
+    <Version>1.0.0</Version>
+    <FileVersion>$(PackageVersion)</FileVersion>
+    <AssemblyVersion>$(PackageVersion)</AssemblyVersion>
+    <Authors>LNI.Tek</Authors>
+    <Description>Satisfactory Production Manager</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\Egbert\.nuget\packages\extrafunctions\1.3.0\contentFiles\any\net6.0-windows7.0\ExFun Logo.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Help.png" />
+    <None Remove="Resources\Help\CRMAltRecipes.md" />
+    <None Remove="Resources\Help\CRMBuildings.md" />
+    <None Remove="Resources\Help\CRMHowTo.md" />
+    <None Remove="Resources\Help\CRMHowTo.txt" />
+    <None Remove="Resources\Help\CRMItems.md" />
+    <None Remove="Resources\Help\CRMItems.txt" />
+    <None Remove="Resources\Help\CRMPowerGen.md" />
+    <None Remove="Resources\Help\CRMRecipes.md" />
+    <None Remove="Resources\Help\ModsHowTo.md" />
+    <None Remove="Resources\Help\ModsHowTo.txt" />
+    <None Remove="Resources\Help\ProVHowTo.md" />
+    <None Remove="Resources\Help\ProVHowTo.txt" />
+    <None Remove="Resources\Help\RPSHowTo.md" />
+    <None Remove="Resources\Help\ToolHowTo.md" />
+    <None Remove="Resources\Info.png" />
+    <None Remove="Resources\New.png" />
+    <None Remove="Resources\Open.png" />
+    <None Remove="Resources\Save.png" />
+    <None Remove="Resources\SaveAs.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SFPPlanner.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Help\CRMAltRecipes.md" />
+    <Resource Include="Resources\Help\CRMBuildings.md" />
+    <Resource Include="Resources\Help\CRMHowTo.md" />
+    <Resource Include="Resources\Help\CRMItems.md" />
+    <Resource Include="Resources\Help\CRMPowerGen.md" />
+    <Resource Include="Resources\Help\CRMRecipes.md" />
+    <Resource Include="Resources\Help\ModsHowTo.md" />
+    <Resource Include="Resources\Help\ProVHowTo.md" />
+    <Resource Include="Resources\Help\RPSHowTo.md" />
+    <Resource Include="Resources\Help\ToolHowTo.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\Icons\New.png" />
+    <Resource Include="Resources\Icons\Open.png" />
+    <Resource Include="Resources\Icons\Save.png" />
+    <Resource Include="Resources\Icons\SaveAs.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.100.3" />
+    <PackageReference Include="ExtraFunctions" Version="1.4.1" />
+    <PackageReference Include="MdXaml" Version="1.16.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SFP Calculator\SFP Calculator.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
